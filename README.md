@@ -2,26 +2,23 @@
 
 A Python-based network reconnaissance tool for host discovery, TCP port scanning, service identification, and basic banner grabbing.
 
+Built as a cybersecurity portfolio project to practise Python networking, socket programming, error handling, and unit testing.
+
 ## Features
 
-- Host reachability checks using system ping.
-- TCP port scanning over a configurable port range.
-- Hostname-to-IP resolution.
-- Basic service identification by port number.
-- Banner grabbing for accessible services.
-- Scan results saved to a text report.
-- Input validation for port ranges.
-- Unit tests using Python's built-in `unittest` framework.
+- **Host discovery:** Checks whether a target host is reachable.
+- **TCP port scanning:** Scans a configurable range of TCP ports.
+- **Service identification:** Attempts to identify common services by port number.
+- **Banner grabbing:** Collects basic service responses where supported.
+- **Hostname resolution:** Resolves hostnames to IP addresses.
+- **Input validation:** Validates port ranges and target input.
+- **Scan reports:** Saves scan findings to a text report.
+- **Unit tests:** Tests core scanning and hostname-resolution functionality.
 
 ## Project Structure
 
 ```text
 network-scanner/
-├── docs/
-├── examples/
-├── images/
-├── results/
-│   └── scan_results.txt
 ├── src/
 │   ├── __init__.py
 │   ├── scanner.py
@@ -30,101 +27,91 @@ network-scanner/
 │   ├── __init__.py
 │   ├── test_scanner.py
 │   └── test_utils.py
+├── results/
+│   └── scan_results.txt
+├── main.py
+├── requirements.txt
 ├── .gitignore
 ├── LICENSE
-├── main.py
-├── README.md
-└── requirements.txt
+└── README.md
 ```
 
 ## Requirements
 
-- Python 3.10 or newer
+- Python 3.10 or newer recommended
+- Git
 - Windows, Linux, or macOS
 
-The scanner uses Python standard-library modules for its core functionality.
+The scanner uses Python's standard networking libraries. Check `requirements.txt` for any additional dependencies.
 
 ## Installation
 
-Clone the repository and enter its directory:
+Clone the repository:
 
 ```bash
 git clone https://github.com/Joyatosh-sinha/network-scanner.git
 cd network-scanner
 ```
 
-Create and activate a virtual environment.
+Run the scanner:
 
-**Windows PowerShell:**
-
-```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
+```bash
+python main.py --target 127.0.0.1 --start 1 --end 100
 ```
 
-If PowerShell blocks activation, run the scanner with the virtual environment's Python executable directly.
+Replace `127.0.0.1` with a hostname or IP address you are authorized to test.
 
 ## Usage
 
-Scan the first 100 TCP ports:
+Specify the target and port range:
 
 ```bash
-python main.py --target 127.0.0.1
+python main.py --target 127.0.0.1 --start 1 --end 100
 ```
 
-Scan a specific port range:
+Arguments:
 
-```bash
-python main.py --target 127.0.0.1 --start 7990 --end 8010
-```
-
-Scan a single local port:
-
-```bash
-python main.py --target 127.0.0.1 --start 8000 --end 8000
-```
-
-Run the unit tests:
-
-```bash
-python -m unittest discover -s tests -v
-```
-
-## Example Output
-
-```text
-NETWORK SCANNER
-Target : 127.0.0.1
-IP     : 127.0.0.1
-Ports  : 8000-8000
-
-[+] Host 127.0.0.1 is UP.
-[+] Port 8000 is OPEN
-[+] Scan completed.
-```
-
-Actual output may vary depending on the target and running services.
-
-## Results
-
-Scan reports are stored in the `results/` directory when report saving is enabled.
-
-## Security and Ethical Use
-
-Use this tool only on systems you own or have explicit authorization to test. Scan responsibly and comply with applicable laws and policies.
+| Argument | Description |
+|---|---|
+| `--target` | Target hostname or IP address (required) |
+| `--start` | Starting TCP port; defaults to 1 |
+| `--end` | Ending TCP port; defaults to 100 |
 
 ## Testing
 
-The project includes unit tests for port-status handling, service-name lookup, and hostname resolution.
-
-Run all tests using:
+Run the unit tests from the project root:
 
 ```bash
 python -m unittest discover -s tests -v
 ```
+
+The tests cover port-scanning behavior, service identification, and hostname resolution.
+
+## Scan Reports
+
+Scan reports are saved under `results/`. Review the report before sharing it publicly, and avoid publishing sensitive hostnames, internal IP information, or other private details.
+
+## Learning Objectives
+
+This project demonstrates practical experience with:
+
+- Python socket programming
+- TCP networking fundamentals
+- Hostname and IP address resolution
+- Basic service fingerprinting
+- Exception handling and input validation
+- Unit testing with `unittest`
+- Git and GitHub project management
+
+## Ethical Use
+
+Use this tool only on systems you own or have explicit permission to assess. Only scan networks and hosts within your authorized scope.
+
+This project is intended for educational purposes and authorized security testing.
 
 ## Author
 
 **Joyatosh Sinha**
 
 - GitHub: https://github.com/Joyatosh-sinha
+
