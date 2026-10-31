@@ -1,6 +1,7 @@
+import platform
 import socket
 import subprocess
-import platform
+
 
 def grab_banner(ip, port, timeout=2):
     """
@@ -21,7 +22,7 @@ def grab_banner(ip, port, timeout=2):
 
             return banner.decode(errors="ignore").strip()
 
-    except (socket.error, UnicodeDecodeError):
+    except (OSError, UnicodeDecodeError):
         return None
     
 def scan_port(ip, port, timeout=1):
@@ -36,7 +37,7 @@ def scan_port(ip, port, timeout=1):
         result = sock.connect_ex((ip, port))
         return result == 0
 
-    except socket.error:
+    except OSError:
         return False
 
     finally:
@@ -57,10 +58,11 @@ def is_host_up(ip):
 
     try:
         result = subprocess.run(
-            command,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
+    command,
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.DEVNULL,
+    check=False
+)
 
         return result.returncode == 0
 

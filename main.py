@@ -1,12 +1,12 @@
+import argparse
 from datetime import datetime
 from pathlib import Path
-import argparse
 
 from src.scanner import (
-    is_host_up,
-    scan_port,
     get_service_name,
     grab_banner,
+    is_host_up,
+    scan_port,
 )
 from src.utils import resolve_target
 

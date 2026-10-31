@@ -2,7 +2,7 @@
 import unittest
 from unittest.mock import patch
 
-from src.scanner import scan_port, get_service_name
+from src.scanner import get_service_name, scan_port
 
 
 class TestScanner(unittest.TestCase):
