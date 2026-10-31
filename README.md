@@ -109,6 +109,30 @@ Use this tool only on systems you own or have explicit permission to assess. Onl
 
 This project is intended for educational purposes and authorized security testing.
 
+## Demo
+
+![Network Scanner live demonstration](docs/images/network-scanner-demo.png)
+
+The following screenshot shows a local test run of the Network Scanner.
+
+![Network Scanner running against a local test target, showing TCP scan results](docs/images/network-scanner-demo.png)
+
+### Example command
+
+```bash
+python main.py --target 127.0.0.1 --start 7999 --end 8001
+```
+
+This example uses a local test environment. Results depend on which services are running and the network configuration.
+
+### Automated tests
+
+Run the unit tests with:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
 ## Author
 
 **Joyatosh Sinha**
