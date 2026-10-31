@@ -17,6 +17,27 @@ Built as a cybersecurity portfolio project to practise Python networking, socket
 - **Scan reports:** Saves scan findings to a text report.
 - **Unit tests:** Tests core scanning and hostname-resolution functionality.
 
+
+## Project Architecture
+
+The Network Scanner follows a modular design that separates command-line handling, hostname resolution, TCP scanning, service identification, and result reporting.
+
+```mermaid
+flowchart TD
+    A["User"] --> B["main.py - CLI"]
+    B --> C["Parse Arguments"]
+    C --> D["src/utils.py - Resolve Hostname"]
+    D --> E["Check Host Availability"]
+    E --> F["TCP Port Scanning"]
+    F --> G["Service Identification"]
+    F --> H["Banner Grabbing"]
+    G --> I["Collect Scan Results"]
+    H --> I
+    I --> J["Display Results in Terminal"]
+    I --> K["results/scan_results.txt"]
+```
+
+
 ## Project Structure
 
 ```text
