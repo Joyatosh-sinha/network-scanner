@@ -1,5 +1,7 @@
 # Network Scanner
 
+![Python Network Scanner Tests](https://github.com/Joyatosh-sinha/network-scanner/actions/workflows/tests.yml/badge.svg)
+
 A Python-based network reconnaissance tool for host discovery, TCP port scanning, service identification, and basic banner grabbing.
 
 Built as a cybersecurity portfolio project to practise Python networking, socket programming, error handling, and unit testing.
