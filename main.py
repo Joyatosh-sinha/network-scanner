@@ -7,7 +7,7 @@ from src.scanner import (
     grab_banner,
     identify_service,
     is_host_up,
-    scan_port,
+    scan_ports,
 )
 from src.utils import resolve_target
 
@@ -72,6 +72,13 @@ def main():
         help="Ending TCP port (default: 100)",
     )
 
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=100,
+        help="Number of concurrent scanning workers (default: 100)",
+    )
+
     args = parser.parse_args()
 
     if not 1 <= args.start <= 65535:
@@ -83,6 +90,9 @@ def main():
     if args.start > args.end:
         parser.error("Start port cannot be greater than end port.")
 
+    if args.workers < 1:
+        parser.error("Workers must be at least 1.")
+
     try:
         ip_address = resolve_target(args.target)
     except (ValueError, OSError) as error:
@@ -92,9 +102,10 @@ def main():
     print("=" * 60)
     print("NETWORK SCANNER")
     print("=" * 60)
-    print(f"Target : {args.target}")
-    print(f"IP     : {ip_address}")
-    print(f"Ports  : {args.start}-{args.end}")
+    print(f"Target  : {args.target}")
+    print(f"IP      : {ip_address}")
+    print(f"Ports   : {args.start}-{args.end}")
+    print(f"Workers : {args.workers}")
     print("=" * 60)
 
     print(f"\n[*] Checking whether {ip_address} is reachable...")
@@ -110,15 +121,19 @@ def main():
 
     print(
         f"\n[*] Scanning TCP ports "
-        f"{args.start}-{args.end}..."
+        f"{args.start}-{args.end} using {args.workers} workers..."
+    )
+
+    open_port_numbers = scan_ports(
+        ip_address,
+        args.start,
+        args.end,
+        workers=args.workers,
     )
 
     open_ports = []
 
-    for port in range(args.start, args.end + 1):
-        if not scan_port(ip_address, port):
-            continue
-
+    for port in open_port_numbers:
         banner = grab_banner(ip_address, port)
         service = identify_service(port, banner)
 

@@ -2,6 +2,7 @@
 import platform
 import socket
 import subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 def _validate_port(port):
@@ -71,6 +72,44 @@ def scan_port(ip, port, timeout=1):
                 pass
 
 
+def scan_ports(ip, start_port, end_port, timeout=1, workers=100):
+    """Scan a TCP port range concurrently.
+
+    Returns a sorted list of open port numbers.
+    """
+    _validate_port(start_port)
+    _validate_port(end_port)
+    _validate_timeout(timeout)
+
+    if start_port > end_port:
+        raise ValueError("Start port cannot be greater than end port.")
+
+    if isinstance(workers, bool) or not isinstance(workers, int):
+        raise TypeError("Workers must be an integer.")
+
+    if workers < 1:
+        raise ValueError("Workers must be at least 1.")
+
+    open_ports = []
+
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = {
+            executor.submit(scan_port, ip, port, timeout): port
+            for port in range(start_port, end_port + 1)
+        }
+
+        for future in as_completed(futures):
+            port = futures[future]
+
+            try:
+                if future.result():
+                    open_ports.append(port)
+            except OSError:
+                continue
+
+    return sorted(open_ports)
+
+
 def is_host_up(ip):
     """Check whether a host responds to an ICMP ping."""
     if not isinstance(ip, str) or not ip.strip():
@@ -124,10 +163,7 @@ def get_service_name(port):
 
 
 def identify_service(port, banner):
-    """
-    Identify a service using banner evidence.
-    Fall back to the port-based service name when unknown.
-    """
+    """Identify a service using banner evidence."""
     if not banner:
         return get_service_name(port)
 

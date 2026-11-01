@@ -6,6 +6,7 @@ from src.scanner import (
     get_service_name,
     identify_service,
     scan_port,
+    scan_ports,
 )
 
 
@@ -53,7 +54,6 @@ class TestScanner(unittest.TestCase):
         banner = "MySQL server version 8.0"
         self.assertEqual(identify_service(3306, banner), "mysql")
 
-    
     def test_identify_empty_banner_fallback(self):
         with patch(
             "src.scanner.socket.getservbyport",
@@ -64,6 +64,47 @@ class TestScanner(unittest.TestCase):
                 "http-alt",
             )
 
+    @patch("src.scanner.scan_port")
+    def test_scan_ports_returns_open_ports(self, mock_scan):
+        mock_scan.side_effect = (
+            lambda ip, port, timeout: port in (80, 443)
+        )
+
+        result = scan_ports(
+            "127.0.0.1",
+            79,
+            444,
+            workers=10,
+        )
+
+        self.assertEqual(result, [80, 443])
+
+    @patch("src.scanner.scan_port")
+    def test_scan_ports_returns_sorted_ports(self, mock_scan):
+        mock_scan.side_effect = (
+            lambda ip, port, timeout: port in (83, 80, 81)
+        )
+
+        result = scan_ports(
+            "127.0.0.1",
+            80,
+            83,
+            workers=4,
+        )
+
+        self.assertEqual(result, [80, 81, 83])
+
+    def test_scan_ports_rejects_invalid_range(self):
+        with self.assertRaises(ValueError):
+            scan_ports("127.0.0.1", 100, 50)
+
+    def test_scan_ports_rejects_invalid_workers(self):
+        with self.assertRaises(ValueError):
+            scan_ports("127.0.0.1", 80, 90, workers=0)
+
+    def test_scan_ports_rejects_non_integer_workers(self):
+        with self.assertRaises(TypeError):
+            scan_ports("127.0.0.1", 80, 90, workers="ten")
 
 
 if __name__ == "__main__":
