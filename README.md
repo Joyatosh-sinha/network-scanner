@@ -5,7 +5,7 @@
 
 A Python-based network reconnaissance tool for host discovery, TCP port scanning, service identification, and basic banner grabbing.
 
-Built as a cybersecurity portfolio project to demonstrate practical knowledge of Python networking, socket programming, concurrent execution, input validation, error handling, and automated testing.
+Built as a cybersecurity portfolio project to demonstrate practical knowledge of Python networking, socket programming, concurrent execution, input validation, error handling, automated testing, and report generation.
 
 ## Features
 
@@ -16,9 +16,10 @@ Built as a cybersecurity portfolio project to demonstrate practical knowledge of
 - **Banner Grabbing:** Collects basic service responses from supported ports.
 - **Hostname Resolution:** Resolves hostnames into IP addresses.
 - **Input Validation:** Validates target addresses, port ranges, and worker settings.
-- **Scan Reports:** Saves scan findings to a text report.
+- **Multiple Report Formats:** Exports scan results in TXT, CSV, and JSON formats.
 - **Performance Benchmarking:** Compares sequential and concurrent scanning execution times.
-- **Unit Testing:** Includes automated tests for core scanning and hostname-resolution functionality.
+- **Unit Testing:** Includes automated tests for scanning, hostname resolution, and report generation.
+- **Continuous Integration:** Uses GitHub Actions to run automated checks.
 
 ## Project Architecture
 
@@ -36,7 +37,7 @@ flowchart TD
     G --> I["Collect Scan Results"]
     H --> I
     I --> J["Display Results in Terminal"]
-    I --> K["results/scan_results.txt"]
+    I --> K["Save TXT / CSV / JSON Reports"]
 ```
 
 ## Project Structure
@@ -56,7 +57,8 @@ network-scanner/
 ├── tests/
 │   ├── __init__.py
 │   ├── test_scanner.py
-│   └── test_utils.py
+│   ├── test_utils.py
+│   └── test_reports.py
 ├── results/
 │   └── scan_results.txt
 ├── benchmark.py
@@ -69,7 +71,7 @@ network-scanner/
 
 ## Requirements
 
-- Python 3.10 or newer recommended
+- Python 3.10 or newer
 - Git
 - Windows, Linux, or macOS
 
@@ -89,13 +91,33 @@ git clone https://github.com/Joyatosh-sinha/network-scanner.git
 cd network-scanner
 ```
 
-### 3. Install dependencies
+### 3. Create a virtual environment (recommended)
+
+```bash
+python -m venv venv
+```
+
+Windows PowerShell:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+Linux/macOS:
+
+```bash
+source venv/bin/activate
+```
+
+If PowerShell blocks script activation, you can run the project using the virtual environment's Python executable directly.
+
+### 4. Install dependencies
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-### 4. Run the scanner
+### 5. Run the scanner
 
 ```bash
 python main.py --target 127.0.0.1 --start 1 --end 100
@@ -106,8 +128,6 @@ Replace `127.0.0.1` with a hostname or IP address you own or are explicitly auth
 ## Usage
 
 ### Basic scan
-
-Specify a target and a port range:
 
 ```bash
 python main.py --target 127.0.0.1 --start 1 --end 100
@@ -129,10 +149,46 @@ python main.py --target 127.0.0.1 --start 1 --end 100 --workers 50
 | `--start` | Starting TCP port | 1 |
 | `--end` | Ending TCP port | 100 |
 | `--workers` | Maximum number of concurrent worker threads | 100 |
+| `--format` | Output report format: txt, csv, or json | txt |
 
-The scanner validates the target, port range, and worker configuration before scanning.
+The scanner validates the target, port range, worker configuration, and report format before scanning.
 
 **Note:** Host discovery uses ping. Some systems and networks block ICMP requests, so a host may be reachable even if the ping check does not receive a response.
+
+## Exporting Scan Results
+
+Network Scanner supports three report formats.
+
+| Format | Description |
+|---|---|
+| TXT | Human-readable scan report |
+| CSV | Structured results that can be opened in spreadsheet applications |
+| JSON | Structured results suitable for scripts and further analysis |
+
+### TXT report
+
+TXT is the default output format.
+
+```powershell
+python main.py --target 127.0.0.1 --start 7999 --end 8001
+```
+
+### CSV report
+
+```powershell
+python main.py --target 127.0.0.1 --start 7999 --end 8001 --format csv
+```
+
+### JSON report
+
+```powershell
+python main.py --target 127.0.0.1 --start 7999 --end 8001 --format json
+```
+
+Reports are saved in the `results/` directory.
+
+- Text reports use `results/scan_results.txt`.
+- CSV and JSON reports use automatically generated timestamped filenames.
 
 ## Testing
 
@@ -157,6 +213,7 @@ The test suite covers:
 - Banner-based service detection
 - Invalid input handling
 - Hostname resolution
+- TXT, CSV, and JSON report generation
 
 ## Demo
 
@@ -179,18 +236,6 @@ python -m http.server 8000
 The scanner should detect port `8000` as open while the local HTTP server is running.
 
 Results depend on the services running and the local network configuration.
-
-## Scan Reports
-
-Scan findings are saved in:
-
-```text
-results/scan_results.txt
-```
-
-The report contains information about the scan and detected open ports.
-
-Review reports before sharing them publicly. Avoid publishing sensitive hostnames, internal IP addresses, or other private network information.
 
 ## Performance Benchmark
 
@@ -236,6 +281,7 @@ This project demonstrates practical experience with:
 - Code quality checks with Ruff
 - Git and GitHub project management
 - Continuous integration with GitHub Actions
+- Structured report generation
 
 ## Limitations
 

@@ -1,5 +1,7 @@
 
 import argparse
+import csv
+import json
 from datetime import datetime
 from pathlib import Path
 
@@ -12,8 +14,29 @@ from src.scanner import (
 from src.utils import resolve_target
 
 
-def save_results(target, ip_address, start_port, end_port, open_ports):
-    """Save scan results to a text report."""
+def create_report_data(
+    target,
+    ip_address,
+    start_port,
+    end_port,
+    open_ports,
+):
+    """Create structured scan report data."""
+    return {
+        "scan_date": datetime.now().astimezone().isoformat(),
+        "target": target,
+        "ip_address": ip_address,
+        "port_range": {
+            "start": start_port,
+            "end": end_port,
+        },
+        "total_open_ports": len(open_ports),
+        "open_ports": open_ports,
+    }
+
+
+def save_text_report(report):
+    """Save scan results to a human-readable text report."""
     results_dir = Path("results")
     results_dir.mkdir(parents=True, exist_ok=True)
 
@@ -23,15 +46,20 @@ def save_results(target, ip_address, start_port, end_port, open_ports):
         file.write("\n" + "=" * 60 + "\n")
         file.write("NETWORK SCAN REPORT\n")
         file.write("=" * 60 + "\n")
-        file.write(f"Date       : {datetime.now().astimezone()}\n")
-        file.write(f"Target     : {target}\n")
-        file.write(f"IP Address : {ip_address}\n")
-        file.write(f"Port Range : {start_port}-{end_port}\n")
-        file.write(f"Open Ports : {len(open_ports)}\n")
+        file.write(f"Date       : {report['scan_date']}\n")
+        file.write(f"Target     : {report['target']}\n")
+        file.write(f"IP Address : {report['ip_address']}\n")
+        file.write(
+            f"Port Range : {report['port_range']['start']}-"
+            f"{report['port_range']['end']}\n"
+        )
+        file.write(
+            f"Open Ports : {report['total_open_ports']}\n"
+        )
         file.write("-" * 60 + "\n")
 
-        if open_ports:
-            for result in open_ports:
+        if report["open_ports"]:
+            for result in report["open_ports"]:
                 file.write(
                     f"Port {result['port']} | "
                     f"Service: {result['service'].upper()}\n"
@@ -44,7 +72,71 @@ def save_results(target, ip_address, start_port, end_port, open_ports):
 
         file.write("=" * 60 + "\n")
 
-    print(f"[+] Report saved to: {report_path}")
+    print(f"[+] Text report saved to: {report_path}")
+
+
+def save_csv_report(report):
+    """Save open-port results as a CSV report."""
+    results_dir = Path("results")
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    report_path = results_dir / f"scan_results_{timestamp}.csv"
+
+    fieldnames = [
+        "scan_date",
+        "target",
+        "ip_address",
+        "port",
+        "service",
+        "banner",
+    ]
+
+    with report_path.open(
+        "w",
+        newline="",
+        encoding="utf-8",
+    ) as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for result in report["open_ports"]:
+            writer.writerow({
+                "scan_date": report["scan_date"],
+                "target": report["target"],
+                "ip_address": report["ip_address"],
+                "port": result["port"],
+                "service": result["service"],
+                "banner": result["banner"],
+            })
+
+    print(f"[+] CSV report saved to: {report_path}")
+
+
+def save_json_report(report):
+    """Save complete scan results as a JSON report."""
+    results_dir = Path("results")
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    report_path = results_dir / f"scan_results_{timestamp}.json"
+
+    with report_path.open("w", encoding="utf-8") as file:
+        json.dump(report, file, indent=4, ensure_ascii=False)
+
+    print(f"[+] JSON report saved to: {report_path}")
+
+
+def save_results(report, output_format):
+    """Save scan results in the selected format."""
+    if output_format == "txt":
+        save_text_report(report)
+    elif output_format == "csv":
+        save_csv_report(report)
+    elif output_format == "json":
+        save_json_report(report)
+    else:
+        raise ValueError(f"Unsupported output format: {output_format}")
 
 
 def main():
@@ -79,6 +171,13 @@ def main():
         help="Number of concurrent scanning workers (default: 100)",
     )
 
+    parser.add_argument(
+        "--format",
+        choices=["txt", "csv", "json"],
+        default="txt",
+        help="Report format: txt, csv, or json (default: txt)",
+    )
+
     args = parser.parse_args()
 
     if not 1 <= args.start <= 65535:
@@ -106,6 +205,7 @@ def main():
     print(f"IP      : {ip_address}")
     print(f"Ports   : {args.start}-{args.end}")
     print(f"Workers : {args.workers}")
+    print(f"Format  : {args.format.upper()}")
     print("=" * 60)
 
     print(f"\n[*] Checking whether {ip_address} is reachable...")
@@ -174,13 +274,15 @@ def main():
     print("=" * 60)
     print("[+] Scan completed.")
 
-    save_results(
+    report = create_report_data(
         args.target,
         ip_address,
         args.start,
         args.end,
         open_ports,
     )
+
+    save_results(report, args.format)
 
 
 if __name__ == "__main__":
